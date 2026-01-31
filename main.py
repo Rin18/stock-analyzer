@@ -6,8 +6,16 @@ def main():
     symbol = get_input("symbol")
     period = get_input("period")
     interval = get_input("interval")
-    print(yf.Ticker(symbol).history(period, interval))
+    df = refine_dataframe(yf.Ticker(symbol).history(period, interval))
+    print(df)
 
+
+def refine_dataframe(df: pd.DataFrame):
+    df.drop(columns=["Volume", "Dividends", "Stock Splits", "Open", "High", "Low"], inplace=True)
+    df.index = df.index.date
+    df["Returns"] = df["Close"].pct_change()
+    df["Cumulative Returns"] = (df["Returns"] + 1).cumprod() - 1
+    return df
 
 def get_input(type):
     allowed_input = ("symbol", "period", "interval")
